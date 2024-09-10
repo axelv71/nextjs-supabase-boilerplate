@@ -9,6 +9,7 @@ import {useFormState, useFormStatus} from 'react-dom';
 import React from "react";
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert";
 import {login} from "@/actions/auth";
+import {GoogleButton} from "@/components/auth/google-button.";
 
 interface LoginFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -41,7 +42,7 @@ export const LoginForm = ({
                         />
                         {state.errors.email && (
                             <Alert variant="destructive">
-                                <AlertCircle className="h-4 w-4" />
+                                <AlertCircle className="h-4 w-4"/>
                                 <AlertTitle>Error</AlertTitle>
                                 <AlertDescription>
                                     {state.errors.email}
@@ -64,7 +65,7 @@ export const LoginForm = ({
                         />
                         {state.errors.password && (
                             <Alert variant="destructive">
-                                <AlertCircle className="h-4 w-4" />
+                                <AlertCircle className="h-4 w-4"/>
                                 <AlertTitle>Error</AlertTitle>
                                 <AlertDescription>
                                     {state.errors.password}
@@ -74,22 +75,34 @@ export const LoginForm = ({
                     </div>
                     {state.errors._form && (
                         <Alert variant="destructive">
-                            <AlertCircle className="h-4 w-4" />
+                            <AlertCircle className="h-4 w-4"/>
                             <AlertTitle>Error</AlertTitle>
                             <AlertDescription>
                                 {state.errors._form}
                             </AlertDescription>
                         </Alert>
                     )}
-                    <SubmitButton />
+                    <SubmitButton/>
                 </div>
             </form>
+
+            <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t"/>
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">
+                    Or continue with
+                  </span>
+                </div>
+            </div>
+            <GoogleButton/>
         </div>
     )
 }
 
 const SubmitButton = () => {
-    const { pending } = useFormStatus();
+    const {pending} = useFormStatus();
 
     return (
         <Button type="submit" disabled={pending}>
