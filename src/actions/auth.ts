@@ -6,12 +6,14 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 const signUpSchema = z.object({
+  name: z.string().min(2).max(255),
   email: z.string().email(),
   password: z.string().min(6).max(255),
 });
 
 interface SignUpFormState {
   errors: {
+    name?: string[];
     email?: string[];
     password?: string[];
     _form?: string[];
@@ -25,6 +27,7 @@ export async function signUp(
   const supabase = createClient();
 
   const result = signUpSchema.safeParse({
+    name: formData.get('name'),
     email: formData.get('email'),
     password: formData.get('password'),
   });
@@ -35,7 +38,15 @@ export async function signUp(
     };
   }
 
-  const { error } = await supabase.auth.signUp(result.data);
+  const { error } = await supabase.auth.signUp({
+    email: result.data.email,
+    password: result.data.password,
+    options: {
+      data: {
+        name: result.data.name,
+      },
+    },
+  });
   if (error) {
     return {
       errors: {

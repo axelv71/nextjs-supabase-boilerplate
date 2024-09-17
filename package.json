@@ -3,12 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "pnpm generate:db:types && next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --check --ignore-path .gitignore .",
-    "format:fix": "prettier --write --ignore-path .gitignore ."
+    "format:fix": "prettier --write --ignore-path .gitignore .",
+    "generate:db:types": "supabase gen types typescript --linked > src/types/database.types.ts"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.0",

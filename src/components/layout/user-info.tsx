@@ -7,10 +7,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { LogoutItem } from '@/components/layout/logout-item';
 import { Separator } from '@/components/ui/separator';
-import { getRequiredUser } from '@/utils/auth';
+import { getUserProfile } from '@/utils/user';
 
 export const UserInfo = async () => {
-  const user = await getRequiredUser();
+  const userProfile = await getUserProfile();
 
   return (
     <DropdownMenu>
@@ -21,18 +21,16 @@ export const UserInfo = async () => {
             <div className="space-x-2 flex items-center">
               <Avatar className="size-9 mr-1">
                 <AvatarImage
-                  src={user?.user_metadata.avatar_url}
+                  src={userProfile.profile.picture_url || ''}
                   alt="User avatar"
                 />
                 <AvatarFallback className="text-black text-sm">
-                  {user?.user_metadata.full_name
-                    ? user.user_metadata.full_name[0]
-                    : user?.email?.[0]}
+                  {userProfile.profile.username?.[0] ||
+                    userProfile.profile.email[0]}
                 </AvatarFallback>
               </Avatar>
-
               <span className="font-bold text-sm">
-                {user?.user_metadata.full_name || user?.email}
+                {userProfile.profile.username || userProfile.profile.email}
               </span>
             </div>
 

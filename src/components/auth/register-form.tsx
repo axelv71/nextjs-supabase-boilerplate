@@ -24,6 +24,26 @@ export const RegisterForm = ({ className, ...props }: RegisterFormProps) => {
       <form action={action}>
         <div className="grid gap-4">
           <div className="grid gap-1">
+            <Label htmlFor="name">Name</Label>
+            <Input
+              id="name"
+              name="name"
+              placeholder="John Doe"
+              type="text"
+              autoCapitalize="none"
+              autoComplete="name"
+              autoCorrect="off"
+              disabled={pending}
+            />
+            {state.errors.name && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{state.errors.name}</AlertDescription>
+              </Alert>
+            )}
+          </div>
+          <div className="grid gap-1">
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
@@ -51,6 +71,7 @@ export const RegisterForm = ({ className, ...props }: RegisterFormProps) => {
               name="password"
               autoCapitalize="none"
               autoComplete="password"
+              placeholder="********"
               autoCorrect="off"
               disabled={pending}
             />
