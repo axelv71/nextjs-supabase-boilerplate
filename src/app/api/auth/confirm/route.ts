@@ -2,6 +2,8 @@ import { type EmailOtpType } from '@supabase/supabase-js';
 import { type NextRequest } from 'next/server';
 import { notFound, redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { retrieveUserDefaultOrganization } from '@/utils/organization';
+import { Tables } from '@/types/database.types';
 
 export async function GET(request: NextRequest) {
   console.log('GET /api/auth/confirm');
@@ -19,7 +21,13 @@ export async function GET(request: NextRequest) {
     });
     if (!error) {
       // redirect user to specified redirect URL or root of app
-      redirect(next);
+      const defaultOrganization =
+        await retrieveUserDefaultOrganization(supabase);
+
+      console.log('OTP verified successfully', next);
+      redirect(
+        `/${(defaultOrganization.organizations as unknown as Tables<'organizations'>).slug}${next}`,
+      );
     }
 
     console.error('Error verifying OTP:', error);

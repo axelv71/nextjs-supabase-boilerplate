@@ -34,6 +34,29 @@ export type Database = {
   }
   public: {
     Tables: {
+      customers: {
+        Row: {
+          id: string
+          stripe_customer_id: string
+        }
+        Insert: {
+          id: string
+          stripe_customer_id: string
+        }
+        Update: {
+          id?: string
+          stripe_customer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customers_id_fkey"
+            columns: ["id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_members: {
         Row: {
           created_at: string | null
@@ -100,6 +123,95 @@ export type Database = {
         }
         Relationships: []
       }
+      prices: {
+        Row: {
+          active: boolean
+          created_at: string | null
+          currency: string
+          description: string | null
+          id: string
+          interval: Database["public"]["Enums"]["plan_interval"] | null
+          interval_count: number | null
+          metadata: Json | null
+          product_id: string
+          trial_period_days: number | null
+          type: Database["public"]["Enums"]["price_type"]
+          unit_amount: number
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string | null
+          currency: string
+          description?: string | null
+          id: string
+          interval?: Database["public"]["Enums"]["plan_interval"] | null
+          interval_count?: number | null
+          metadata?: Json | null
+          product_id: string
+          trial_period_days?: number | null
+          type: Database["public"]["Enums"]["price_type"]
+          unit_amount: number
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean
+          created_at?: string | null
+          currency?: string
+          description?: string | null
+          id?: string
+          interval?: Database["public"]["Enums"]["plan_interval"] | null
+          interval_count?: number | null
+          metadata?: Json | null
+          product_id?: string
+          trial_period_days?: number | null
+          type?: Database["public"]["Enums"]["price_type"]
+          unit_amount?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prices_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          active: boolean
+          created_at: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          metadata: Json | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string | null
+          description?: string | null
+          id: string
+          image_url?: string | null
+          metadata?: Json | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          metadata?: Json | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           email: string
@@ -129,15 +241,128 @@ export type Database = {
           },
         ]
       }
+      subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean
+          canceled_at: string | null
+          created_at: string | null
+          current_period_end: string | null
+          current_period_start: string | null
+          ended_at: string | null
+          id: string
+          metadata: Json | null
+          organization_id: string
+          price_id: string
+          quantity: number | null
+          status: Database["public"]["Enums"]["subscription_status"]
+          trial_end: string | null
+          trial_start: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          cancel_at_period_end?: boolean
+          canceled_at?: string | null
+          created_at?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          ended_at?: string | null
+          id: string
+          metadata?: Json | null
+          organization_id: string
+          price_id: string
+          quantity?: number | null
+          status: Database["public"]["Enums"]["subscription_status"]
+          trial_end?: string | null
+          trial_start?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          cancel_at_period_end?: boolean
+          canceled_at?: string | null
+          created_at?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          ended_at?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id?: string
+          price_id?: string
+          quantity?: number | null
+          status?: Database["public"]["Enums"]["subscription_status"]
+          trial_end?: string | null
+          trial_start?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_price_id_fkey"
+            columns: ["price_id"]
+            isOneToOne: false
+            referencedRelation: "prices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_organization_admin_or_owner: {
+        Args: {
+          org_id: string
+        }
+        Returns: boolean
+      }
+      is_organization_member: {
+        Args: {
+          org_id: string
+        }
+        Returns: boolean
+      }
+      is_organization_owner: {
+        Args: {
+          org_id: string
+        }
+        Returns: boolean
+      }
+      owner_count: {
+        Args: {
+          org_id: string
+        }
+        Returns: number
+      }
     }
     Enums: {
       organization_member_role: "owner" | "admin" | "member"
+      plan_interval: "day" | "week" | "month" | "year"
+      price_type: "recurring" | "one_time"
+      subscription_status:
+        | "trialing"
+        | "active"
+        | "canceled"
+        | "incomplete"
+        | "incomplete_expired"
+        | "past_due"
+        | "paused"
+        | "unpaid"
     }
     CompositeTypes: {
       [_ in never]: never

@@ -4,6 +4,8 @@ import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { retrieveUserDefaultOrganization } from '@/utils/organization';
+import { Tables } from '@/types/database.types';
 
 const signUpSchema = z.object({
   name: z.string().min(2).max(255),
@@ -98,6 +100,10 @@ export async function login(
     };
   }
 
+  const organization = await retrieveUserDefaultOrganization(supabase);
+
   revalidatePath('/', 'layout');
-  redirect('/');
+  redirect(
+    `/${(organization.organizations as unknown as Tables<'organizations'>).slug}`,
+  );
 }

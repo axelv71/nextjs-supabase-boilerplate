@@ -1,13 +1,15 @@
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { Database } from '@/types/database.types';
+import { config } from '@/config';
 
 export function createClient() {
   const cookieStore = cookies();
 
   return createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    config.env.supabase.url,
+    config.env.supabase.key,
     {
       cookies: {
         getAll() {
@@ -24,5 +26,12 @@ export function createClient() {
         },
       },
     },
+  );
+}
+
+export function createAdminClient() {
+  return createSupabaseClient<Database>(
+    config.env.supabase.url,
+    config.env.supabase.serviceRole,
   );
 }
