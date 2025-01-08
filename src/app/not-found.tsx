@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
-import { retrieveUserDefaultOrganization } from '@/utils/organization';
-import { Button } from '@/components/ui/button';
+import { retrieveUserDefaultOrganization } from '@/services/organization';
+import { RoundedButton } from '@/components/ui/rounded-button';
 import Link from 'next/link';
 import { Tables } from '@/types/database.types';
 import { Suspense } from 'react';
@@ -17,26 +17,26 @@ export default function NotFound() {
 }
 
 async function GoBack() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase.auth.getUser();
 
   if (error || !data) {
     return (
-      <Button asChild>
+      <RoundedButton asChild>
         <Link href="/login">Go to login</Link>
-      </Button>
+      </RoundedButton>
     );
   }
 
   const defaultOrganization = await retrieveUserDefaultOrganization(supabase);
 
   return (
-    <Button asChild>
+    <RoundedButton asChild>
       <Link
         href={`/${(defaultOrganization.organizations as unknown as Tables<'organizations'>).slug}`}
       >
         Go to Dashboard
       </Link>
-    </Button>
+    </RoundedButton>
   );
 }

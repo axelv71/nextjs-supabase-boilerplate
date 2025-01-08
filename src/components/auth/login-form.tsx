@@ -2,33 +2,45 @@
 
 import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { AlertCircle, LoaderCircle } from 'lucide-react';
-import { useFormState, useFormStatus } from 'react-dom';
-import React from 'react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { RoundedInput } from '@/components/ui/rounded-input';
+import { RoundedButton } from '@/components/ui/rounded-button';
+import { LoaderCircle } from 'lucide-react';
+import { useFormStatus } from 'react-dom';
+import React, { useActionState } from 'react';
+import { Alert, AlertTitle } from '@/components/ui/alert';
 import { login } from '@/actions/auth';
 import { GoogleButton } from '@/components/auth/google-button.';
+import Link from 'next/link';
+import { Separator } from '@/components/ui/separator';
 
-interface LoginFormProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface LoginFormProps extends React.HTMLAttributes<HTMLDivElement> {
+  next?: string;
+  nextActionType?: string;
+}
 
-export const LoginForm = ({ className, ...props }: LoginFormProps) => {
-  const [state, action] = useFormState(login, {
+export const LoginForm = ({
+  className,
+  next,
+  nextActionType,
+  ...props
+}: LoginFormProps) => {
+  const [state, action, pending] = useActionState(login, {
     errors: {},
   });
-  const { pending } = useFormStatus();
 
   return (
     <div className={cn('grid gap-6', className)} {...props}>
       <form action={action}>
-        <div className="grid gap-4">
-          <div className="grid gap-1">
-            <Label htmlFor="email">Email</Label>
-            <Input
+        <input type="hidden" name="next" value={next} />
+        <div className="grid gap-5">
+          <div className="grid gap-3">
+            <Label className="font-medium" htmlFor="email">
+              Email
+            </Label>
+            <RoundedInput
               id="email"
               name="email"
-              placeholder="name@example.com"
+              placeholder="email@example.com"
               type="email"
               autoCapitalize="none"
               autoComplete="email"
@@ -37,18 +49,27 @@ export const LoginForm = ({ className, ...props }: LoginFormProps) => {
             />
             {state.errors.email && (
               <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Error</AlertTitle>
-                <AlertDescription>{state.errors.email}</AlertDescription>
+                <AlertTitle>{state.errors.email}</AlertTitle>
               </Alert>
             )}
           </div>
-          <div className="grid gap-1">
-            <Label htmlFor="password">Password</Label>
-            <Input
+          <div className="grid gap-3">
+            <div className="flex justify-between">
+              <Label className="font-medium" htmlFor="password">
+                Password
+              </Label>
+              <Link
+                href="/forgot-password"
+                className="text-xs leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 font-normal hover:underline"
+              >
+                Forgot Password
+              </Link>
+            </div>
+            <RoundedInput
               id="password"
               type="password"
               name="password"
+              placeholder="&#x2022; &#x2022; &#x2022; &#x2022; &#x2022; &#x2022;"
               autoCapitalize="none"
               autoComplete="password"
               autoCorrect="off"
@@ -56,34 +77,25 @@ export const LoginForm = ({ className, ...props }: LoginFormProps) => {
             />
             {state.errors.password && (
               <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Error</AlertTitle>
-                <AlertDescription>{state.errors.password}</AlertDescription>
+                <AlertTitle>{state.errors.password}</AlertTitle>
               </Alert>
             )}
           </div>
           {state.errors._form && (
             <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>{state.errors._form}</AlertDescription>
+              <AlertTitle>{state.errors._form}</AlertTitle>
             </Alert>
           )}
           <SubmitButton />
         </div>
       </form>
-
       <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">
-            Or continue with
-          </span>
-        </div>
+        <Separator />
+        <span className="absolute left-1/2 text-center -translate-x-1/2 w-8 bg-white -top-3">
+          or
+        </span>
       </div>
-      <GoogleButton />
+      <GoogleButton next={next} nextActionType={nextActionType} />
     </div>
   );
 };
@@ -92,9 +104,9 @@ const SubmitButton = () => {
   const { pending } = useFormStatus();
 
   return (
-    <Button type="submit" disabled={pending}>
+    <RoundedButton type="submit" disabled={pending}>
       {pending && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
-      Login with Email
-    </Button>
+      Login in with email -{'>'}
+    </RoundedButton>
   );
 };

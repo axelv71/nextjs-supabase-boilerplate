@@ -2,7 +2,11 @@ import Stripe from 'stripe';
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { config } from '@/config';
-import { manageSubscription, upsertPrice, upsertProduct } from '@/utils/stripe';
+import {
+  manageSubscription,
+  upsertPrice,
+  upsertProduct,
+} from '@/services/stripe';
 
 export async function POST(req: NextRequest) {
   const signature = req.headers.get('stripe-signature');
@@ -39,9 +43,14 @@ export async function POST(req: NextRequest) {
         break;
       case 'customer.subscription.created':
       case 'customer.subscription.updated':
-      case 'customer.subscription.deleted':
-        await manageSubscription(event.data.object as Stripe.Subscription);
+      case 'customer.subscription.deleted': {
+        const subscription = event.data.object as Stripe.Subscription;
+        await manageSubscription(
+          subscription.id,
+          event.type === 'customer.subscription.created',
+        );
         break;
+      }
       default:
         throw new Error('Unhandled relevant event');
     }

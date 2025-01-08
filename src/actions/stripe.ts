@@ -1,14 +1,12 @@
 'use server';
 
 import { z } from 'zod';
-import { getOrganizationBySlug } from '@/utils/organization';
+import { getOrganizationBySlug } from '@/services/organization';
 import { createClient } from '@/lib/supabase/server';
-import { createOrRetrieveCustomer } from '@/utils/stripe';
+import { createOrRetrieveCustomer } from '@/services/stripe';
 import { stripe } from '@/lib/stripe';
 import { config } from '@/config';
 import { redirect } from 'next/navigation';
-
-const supabase = createClient();
 
 const createCheckoutSessionSchema = z.object({
   price: z.string(),
@@ -27,6 +25,8 @@ export async function createCheckoutSession(
   prevState: CreateCheckoutSessionState,
   formData: FormData,
 ): Promise<CreateCheckoutSessionState> {
+  const supabase = await createClient();
+
   const data = createCheckoutSessionSchema.safeParse({
     price: formData.get('price'),
     organizationSlug: formData.get('organizationSlug'),

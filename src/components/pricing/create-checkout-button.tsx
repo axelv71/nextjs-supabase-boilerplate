@@ -1,8 +1,9 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { useFormStatus, useFormState } from 'react-dom';
+import { RoundedButton } from '@/components/ui/rounded-button';
+import { useFormStatus } from 'react-dom';
 import { createCheckoutSession } from '@/actions/stripe';
+import { useActionState } from 'react';
 
 type CreateCheckoutProps = {
   priceId: string;
@@ -13,7 +14,7 @@ export const CreateCheckoutButton = ({
   priceId,
   organizationSlug,
 }: CreateCheckoutProps) => {
-  const [formState, action] = useFormState(createCheckoutSession, {
+  const [formState, action] = useActionState(createCheckoutSession, {
     errors: {},
   });
 
@@ -36,8 +37,8 @@ export const SubmitButton = () => {
   const { pending } = useFormStatus();
 
   return (
-    <Button size="lg" className="w-full" disabled={pending}>
+    <RoundedButton size="lg" className="w-full" disabled={pending}>
       Get started {pending && '...'}
-    </Button>
+    </RoundedButton>
   );
 };

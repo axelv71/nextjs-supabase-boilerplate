@@ -1,11 +1,19 @@
 import { Fragment, ReactNode } from 'react';
-import { Sidebar } from '@/components/layout/sidebar';
+import NextTopLoader from 'nextjs-toploader';
 
-export default function Layout({ children }: { children: ReactNode }) {
+type LayoutProps = {
+  children: ReactNode;
+};
+
+export default function Layout({ children }: LayoutProps) {
   return (
     <Fragment>
-      <Sidebar />
-      <main className="sm:ml-72">{children}</main>
+      <NextTopLoader
+        color="#000"
+        shadow="0 0 10px rgba(0,0,0,0.2)"
+        showSpinner={false}
+      />
+      {children}
     </Fragment>
   );
 }

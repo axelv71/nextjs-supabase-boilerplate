@@ -6,5 +6,9 @@ namespace NodeJS {
     NEXT_PUBLIC_SITE_URL: string;
     STRIPE_SECRET_KEY: string;
     STRIPE_WEBHOOK_SECRET: string;
+    LOOPS_API_KEY: string;
+    LOOPS_ORG_INVITE_TRANSACTIONAL_ID: string;
+    NEXT_PUBLIC_POSTHOG_KEY: string;
+    NEXT_PUBLIC_POSTHOG_HOST: string;
   }
 }

@@ -2,30 +2,39 @@
 
 import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { AlertCircle, LoaderCircle } from 'lucide-react';
-import { useFormStatus, useFormState } from 'react-dom';
-import React from 'react';
+import { RoundedInput } from '@/components/ui/rounded-input';
+import { RoundedButton } from '@/components/ui/rounded-button';
+import { LoaderCircle } from 'lucide-react';
+import { useFormStatus } from 'react-dom';
+import React, { useActionState } from 'react';
 import { signUp } from '@/actions/auth';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Alert, AlertTitle } from '@/components/ui/alert';
 import { GoogleButton } from '@/components/auth/google-button.';
+import { Separator } from '@/components/ui/separator';
 
-interface RegisterFormProps extends React.HTMLAttributes<HTMLDivElement> {}
+interface RegisterFormProps extends React.HTMLAttributes<HTMLDivElement> {
+  referral?: string;
+}
 
-export const RegisterForm = ({ className, ...props }: RegisterFormProps) => {
-  const [state, action] = useFormState(signUp, {
+export const RegisterForm = ({
+  className,
+  referral,
+  ...props
+}: RegisterFormProps) => {
+  const [state, action, pending] = useActionState(signUp, {
     errors: {},
   });
-  const { pending } = useFormStatus();
 
   return (
     <div className={cn('grid gap-6', className)} {...props}>
       <form action={action}>
-        <div className="grid gap-4">
-          <div className="grid gap-1">
-            <Label htmlFor="name">Name</Label>
-            <Input
+        <input type="hidden" name="referral" value={referral} />
+        <div className="grid gap-5">
+          <div className="grid gap-3">
+            <Label className="font-medium" htmlFor="name">
+              Full Name
+            </Label>
+            <RoundedInput
               id="name"
               name="name"
               placeholder="John Doe"
@@ -37,18 +46,18 @@ export const RegisterForm = ({ className, ...props }: RegisterFormProps) => {
             />
             {state.errors.name && (
               <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Error</AlertTitle>
-                <AlertDescription>{state.errors.name}</AlertDescription>
+                <AlertTitle>{state.errors.name}</AlertTitle>
               </Alert>
             )}
           </div>
-          <div className="grid gap-1">
-            <Label htmlFor="email">Email</Label>
-            <Input
+          <div className="grid gap-3">
+            <Label className="font-medium" htmlFor="email">
+              Email
+            </Label>
+            <RoundedInput
               id="email"
               name="email"
-              placeholder="name@example.com"
+              placeholder="email@example.com"
               type="email"
               autoCapitalize="none"
               autoComplete="email"
@@ -57,52 +66,43 @@ export const RegisterForm = ({ className, ...props }: RegisterFormProps) => {
             />
             {state.errors.email && (
               <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Error</AlertTitle>
-                <AlertDescription>{state.errors.email}</AlertDescription>
+                <AlertTitle>{state.errors.email}</AlertTitle>
               </Alert>
             )}
           </div>
-          <div className="grid gap-1">
-            <Label htmlFor="password">Password</Label>
-            <Input
+          <div className="grid gap-3">
+            <Label className="font-medium" htmlFor="password">
+              Password
+            </Label>
+            <RoundedInput
               id="password"
               type="password"
               name="password"
               autoCapitalize="none"
               autoComplete="password"
-              placeholder="********"
+              placeholder="&#x2022; &#x2022; &#x2022; &#x2022; &#x2022; &#x2022;"
               autoCorrect="off"
               disabled={pending}
             />
             {state.errors.password && (
               <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Error</AlertTitle>
-                <AlertDescription>{state.errors.password}</AlertDescription>
+                <AlertTitle>{state.errors.password}</AlertTitle>
               </Alert>
             )}
           </div>
           {state.errors._form && (
             <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>{state.errors._form}</AlertDescription>
+              <AlertTitle>{state.errors._form}</AlertTitle>
             </Alert>
           )}
           <SubmitButton />
         </div>
       </form>
-
       <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">
-            Or continue with
-          </span>
-        </div>
+        <Separator />
+        <span className="absolute left-1/2 text-center -translate-x-1/2 w-8 bg-white -top-3">
+          or
+        </span>
       </div>
       <GoogleButton />
     </div>
@@ -113,9 +113,9 @@ const SubmitButton = () => {
   const { pending } = useFormStatus();
 
   return (
-    <Button type="submit" disabled={pending}>
+    <RoundedButton type="submit" disabled={pending}>
       {pending && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
-      Sign Up with Email
-    </Button>
+      Get started with email -&gt;
+    </RoundedButton>
   );
 };

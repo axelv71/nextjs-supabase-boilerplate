@@ -20,8 +20,9 @@ $$;
 -- Create a table to store user profiles
 create table public.profiles (
   id uuid not null references auth.users on delete cascade,
-  username text unique,
+  username text not null,
   picture_url text,
+  phone text,
   email text not null,
 
   primary key (id)
@@ -41,39 +42,43 @@ create policy "Allow user to update their own profile"
 
 -- Inserts a row into public.profiles and creates an organization with a custom slug
 create function public.handle_new_user()
-returns trigger
-language plpgsql
-security definer set search_path = ''
+    returns trigger
+    language plpgsql
+    security definer set search_path = ''
 as $$
 declare
-  new_organization_id uuid;
-  random_suffix text;
-  generated_slug text;
-  sanitized_username text;
+    new_organization_id uuid;
+    random_suffix text;
+    generated_slug text;
+    sanitized_username text;
+    username text;
 begin
-  -- Step 1: Insert the new user profile
-  insert into public.profiles (id, username, picture_url, email)
-  values (new.id, new.raw_user_meta_data ->> 'name', new.raw_user_meta_data ->> 'picture', new.email);
+    -- Étape 1 : Déterminer le nom d'utilisateur (priorité au name, sinon tronquer et nettoyer l'email)
+    username := coalesce(
+            new.raw_user_meta_data ->> 'name',
+            replace(split_part(new.email, '@', 1), '.', '')
+                );
 
-  -- Step 2: Sanitize the username by replacing spaces with dashes
-  sanitized_username := lower(replace(new.raw_user_meta_data ->> 'name', ' ', '-'));
+    -- Étape 2 : Insérer le profil utilisateur
+    insert into public.profiles (id, username, picture_url, email)
+    values (new.id, username, new.raw_user_meta_data ->> 'picture', new.email);
 
-  -- Step 3: Generate a 6-character random string for the slug
-  random_suffix := substring(md5(random()::text), 1, 6);
+    -- Étape 3 : Nettoyer le nom d'utilisateur
+    sanitized_username := lower(replace(username, ' ', '-'));
 
-  -- Step 4: Create the slug with the format: "nom-utilisateur-[6 caractères aléatoires]-org"
-  generated_slug := sanitized_username || '-' || random_suffix || '-org';
+    -- Étape 4 : Générer un suffixe aléatoire pour le slug
+    random_suffix := substring(md5(random()::text), 1, 6);
 
-  -- Step 5: Create a new organization for the user with the generated slug
-  insert into public.organizations (name, slug, image_url)
-  values (new.raw_user_meta_data ->> 'name' || ' Organization', generated_slug, new.raw_user_meta_data ->> 'picture')
-  returning id into new_organization_id;
+    -- Étape 5 : Créer une nouvelle organisation
+    insert into public.organizations (name)
+    values (username || ' Organization')
+    returning id into new_organization_id;
 
-  -- Step 6: Add the user to the newly created organization as the owner
-  insert into public.organization_members (organization_id, user_id, role)
-  values (new_organization_id, new.id, 'owner');
+    -- Étape 6 : Ajouter l'utilisateur à l'organisation comme propriétaire
+    insert into public.organization_members (organization_id, user_id, role)
+    values (new_organization_id, new.id, 'owner');
 
-  return new;
+    return new;
 end;
 $$;
 
@@ -90,13 +95,16 @@ create trigger on_auth_user_created
 create table public.organizations (
     id uuid not null default gen_random_uuid(),
     name text not null,
-    slug text not null unique,
+    slug text generated always as (
+        lower(replace(name, ' ', '-')) || '-' || substring(md5(id::text), 1, 6) || '-org'
+    ) stored, -- Généré automatiquement et stocké
     image_url text,
 
     created_at timestamp with time zone default now(),
     updated_at timestamp with time zone default now(),
 
-    primary key (id)
+    primary key (id),
+    unique (slug)
 );
 
 alter table public.organizations enable row level security;

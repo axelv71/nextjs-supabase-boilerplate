@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { LogoutItem } from '@/components/layout/logout-item';
 import { Separator } from '@/components/ui/separator';
-import { getUserProfile } from '@/utils/user';
+import { getUserProfile } from '@/services/user';
 
 export const UserInfo = async () => {
   const userProfile = await getUserProfile();

@@ -34,6 +34,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      affiliate: {
+        Row: {
+          created_at: string
+          id: string
+          referer_id: string | null
+          type: Database["public"]["Enums"]["affiliate_type"] | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          referer_id?: string | null
+          type?: Database["public"]["Enums"]["affiliate_type"] | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          referer_id?: string | null
+          type?: Database["public"]["Enums"]["affiliate_type"] | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_referer_id_fkey"
+            columns: ["referer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "affiliate_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customers: {
         Row: {
           id: string
@@ -47,12 +86,77 @@ export type Database = {
           id?: string
           stripe_customer_id?: string
         }
+        Relationships: []
+      }
+      onboarding: {
+        Row: {
+          created_at: string
+          id: string
+          values: Json | null
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          values?: Json | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          values?: Json | null
+        }
+        Relationships: []
+      }
+      organization_invitations: {
+        Row: {
+          created_at: string
+          id: string
+          invited_user_email: string
+          invited_user_id: string | null
+          invited_user_role: Database["public"]["Enums"]["organization_member_role"]
+          inviter_user_id: string
+          organization_id: string
+          status: Database["public"]["Enums"]["organization_invitation_status"]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invited_user_email: string
+          invited_user_id?: string | null
+          invited_user_role?: Database["public"]["Enums"]["organization_member_role"]
+          inviter_user_id: string
+          organization_id: string
+          status?: Database["public"]["Enums"]["organization_invitation_status"]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invited_user_email?: string
+          invited_user_id?: string | null
+          invited_user_role?: Database["public"]["Enums"]["organization_member_role"]
+          inviter_user_id?: string
+          organization_id?: string
+          status?: Database["public"]["Enums"]["organization_invitation_status"]
+        }
         Relationships: [
           {
-            foreignKeyName: "customers_id_fkey"
-            columns: ["id"]
+            foreignKeyName: "organization_invitations_invited_user_id_fkey"
+            columns: ["invited_user_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_invitations_inviter_user_id_fkey"
+            columns: ["inviter_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_invitations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -87,13 +191,6 @@ export type Database = {
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "organization_members_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
         ]
       }
       organizations: {
@@ -102,7 +199,7 @@ export type Database = {
           id: string
           image_url: string | null
           name: string
-          slug: string
+          slug: string | null
           updated_at: string | null
         }
         Insert: {
@@ -110,7 +207,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           name: string
-          slug: string
+          slug?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -118,7 +215,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           name?: string
-          slug?: string
+          slug?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -216,27 +313,54 @@ export type Database = {
         Row: {
           email: string
           id: string
+          phone: string | null
           picture_url: string | null
-          username: string | null
+          username: string
         }
         Insert: {
           email: string
           id: string
+          phone?: string | null
           picture_url?: string | null
-          username?: string | null
+          username: string
         }
         Update: {
           email?: string
           id?: string
+          phone?: string | null
           picture_url?: string | null
-          username?: string | null
+          username?: string
+        }
+        Relationships: []
+      }
+      promotional_codes: {
+        Row: {
+          code: string | null
+          coupon_id: string
+          created_at: string
+          id: string
+          referer_id: string | null
+        }
+        Insert: {
+          code?: string | null
+          coupon_id: string
+          created_at?: string
+          id?: string
+          referer_id?: string | null
+        }
+        Update: {
+          code?: string | null
+          coupon_id?: string
+          created_at?: string
+          id?: string
+          referer_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "profiles_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "users"
+            foreignKeyName: "promotional_codes_referer_id_fkey"
+            columns: ["referer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -253,6 +377,7 @@ export type Database = {
           metadata: Json | null
           organization_id: string
           price_id: string
+          promotional_code: string | null
           quantity: number | null
           status: Database["public"]["Enums"]["subscription_status"]
           trial_end: string | null
@@ -271,6 +396,7 @@ export type Database = {
           metadata?: Json | null
           organization_id: string
           price_id: string
+          promotional_code?: string | null
           quantity?: number | null
           status: Database["public"]["Enums"]["subscription_status"]
           trial_end?: string | null
@@ -289,6 +415,7 @@ export type Database = {
           metadata?: Json | null
           organization_id?: string
           price_id?: string
+          promotional_code?: string | null
           quantity?: number | null
           status?: Database["public"]["Enums"]["subscription_status"]
           trial_end?: string | null
@@ -322,9 +449,92 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      organization_invitations_view: {
+        Row: {
+          created_at: string | null
+          invitation_id: string | null
+          invitation_status:
+            | Database["public"]["Enums"]["organization_invitation_status"]
+            | null
+          invited_email: string | null
+          invited_picture_url: string | null
+          invited_user_email: string | null
+          invited_user_id: string | null
+          invited_user_role:
+            | Database["public"]["Enums"]["organization_member_role"]
+            | null
+          invited_username: string | null
+          inviter_email: string | null
+          inviter_picture_url: string | null
+          inviter_user_id: string | null
+          inviter_username: string | null
+          organization_id: string | null
+          organization_image_url: string | null
+          organization_member_count: number | null
+          organization_name: string | null
+          organization_slug: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_invitations_invited_user_id_fkey"
+            columns: ["invited_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_invitations_inviter_user_id_fkey"
+            columns: ["inviter_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_invitations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_members_view: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          invitation_id: string | null
+          organization_id: string | null
+          phone: string | null
+          picture_url: string | null
+          role: Database["public"]["Enums"]["organization_member_role"] | null
+          updated_at: string | null
+          user_id: string | null
+          user_status: string | null
+          username: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      get_organization_members: {
+        Args: {
+          org_id: string
+          search?: string
+        }
+        Returns: {
+          organization_id: string
+          user_id: string
+          username: string
+          picture_url: string
+          phone: string
+          email: string
+          role: string
+          user_status: string
+          invitation_id: string
+          created_at: string
+          updated_at: string
+        }[]
+      }
       is_organization_admin_or_owner: {
         Args: {
           org_id: string
@@ -351,6 +561,12 @@ export type Database = {
       }
     }
     Enums: {
+      affiliate_type: "sign_up" | "purchase"
+      organization_invitation_status:
+        | "active"
+        | "accepted"
+        | "declined"
+        | "inactive"
       organization_member_role: "owner" | "admin" | "member"
       plan_interval: "day" | "week" | "month" | "year"
       price_type: "recurring" | "one_time"
@@ -765,4 +981,19 @@ export type Enums<
   ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
     ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof PublicSchema["CompositeTypes"]
+    | { schema: keyof Database },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
+    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
